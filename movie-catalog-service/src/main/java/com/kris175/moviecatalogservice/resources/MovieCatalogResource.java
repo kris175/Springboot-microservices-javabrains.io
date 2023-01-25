@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +20,8 @@ import java.util.stream.Collectors;
 public class MovieCatalogResource {
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private WebClient.Builder webClientBuilder;
     @RequestMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 
@@ -30,13 +33,26 @@ public class MovieCatalogResource {
         );
 
         // For each movieId call movie info service and get details - make api call using REST template
+        // collate both info
         return ratings.stream().map(rating -> {
+                    // Using REST Template
                     Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
-                    return new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating());
+//                    System.out.println("Checkpoint!");
+//                    // Using WebClient
+//                    String movie = webClientBuilder.build()
+//                    .get()
+//                    .uri("http://localhost:8082/movies/" + rating.getMovieId())
+//                    .retrieve()
+//                    .bodyToMono(String.class) // convert whatever response into Movie.class. What is Mono? Reactive way of saying you are getting an object back but not right away - it's a promise
+//                    .block(); // block until mono is fulfilled
+//
+//                    System.out.println(movie);
+
+            return new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating());
                 }
         ).collect(Collectors.toList());
 
-        // collate both info
+
 
     }
 }
