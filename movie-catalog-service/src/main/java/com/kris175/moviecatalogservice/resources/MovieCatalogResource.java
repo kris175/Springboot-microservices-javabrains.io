@@ -22,37 +22,27 @@ public class MovieCatalogResource {
     private RestTemplate restTemplate;
     @Autowired
     private WebClient.Builder webClientBuilder;
+    
     @RequestMapping("/{userId}")
-    public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
-
+    public List<CatalogItem> getCatalog (@PathVariable("userId") String userId) {
+        
         // get all rated movieIds - hard coded for now
         List<Rating> ratings = Arrays.asList(
                 new Rating("123", 5),
                 new Rating("456", 4),
                 new Rating("789", 3)
         );
-
+        
         // For each movieId call movie info service and get details - make api call using REST template
         // collate both info
         return ratings.stream().map(rating -> {
                     // Using REST Template
-                    Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
-//                    System.out.println("Checkpoint!");
-//                    // Using WebClient
-//                    String movie = webClientBuilder.build()
-//                    .get()
-//                    .uri("http://localhost:8082/movies/" + rating.getMovieId())
-//                    .retrieve()
-//                    .bodyToMono(String.class) // convert whatever response into Movie.class. What is Mono? Reactive way of saying you are getting an object back but not right away - it's a promise
-//                    .block(); // block until mono is fulfilled
-//
-//                    System.out.println(movie);
-
-            return new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating());
+                    Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(),
+                            Movie.class);
+                    return new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating());
                 }
         ).collect(Collectors.toList());
-
-
-
+        
+        
     }
 }
